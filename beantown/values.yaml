@@ -1,0 +1,10 @@
+appName: beantown
+
+image:
+  name: jalgraves/beantown
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 3000
+ingressHost: beantownpub.com
+

@@ -1,0 +1,4 @@
+image:
+  name: jalgraves/wavelengths
+  tag: latest
+  pullPolicy: Always

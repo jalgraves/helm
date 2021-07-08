@@ -1,0 +1,14 @@
+appName: menu-api
+
+image:
+  name: jalgraves/menu_api
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 5004
+ingressHost: menu-api.jalgraves.com
+
+db:
+  dbName: food
+  host: postgres.default.svc.cluster.local
+  port: 5432

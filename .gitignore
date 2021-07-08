@@ -1,0 +1,3 @@
+*.tgz
+jal-postgres/templates/secrets.yaml
+.DS_Store

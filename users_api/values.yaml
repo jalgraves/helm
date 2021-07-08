@@ -1,0 +1,13 @@
+appName: users-api
+
+image:
+  name: jalgraves/users_api
+  tag: latest
+  pullPolicy: Always
+
+containerPort: 5045
+
+db:
+  dbName: users
+  host: postgres.default.svc.cluster.local
+  port: 5432
