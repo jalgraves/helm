@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "contact-api.fullname" . }}
+  namespace: default
+  labels:
+    jke/workload: {{ include "contact-api.fullname" . }}
+
+spec:
+  progressDeadlineSeconds: 300
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      jke/workload: {{ include "contact-api.fullname" . }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ include "contact-api.fullname" . }}
+        jke/workload: {{ include "contact-api.fullname" . }}
+    spec:
+      containers:
+      - env:
+        - name: EMAIL_RECIPIENT
+          value: {{ .Values.emailRecipient }}
+        - name: SECOND_EMAIL_RECIPIENT
+          value: {{ .Values.secondEmailRecipient }}
+        - name: SLACK_WEBHOOK_USER
+          value: {{ .Values.slackUser }}
+        - name: SLACK_WEBHOOK_CHANNEL
+          value: {{ .Values.slackChannel }}
+        - name: SLACK_WEBHOOK_URL
+          valueFrom:
+            secretKeyRef:
+              key: url
+              name: slack-webhook
+              optional: false
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: AWS_ACCESS_KEY_ID
+              name: aws
+              optional: false
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: AWS_SECRET_ACCESS_KEY
+              name: aws
+              optional: false
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              key: AWS_DEFAULT_REGION
+              name: aws
+              optional: false
+      {{- if eq .Values.global.env "dev" }}
+        image: "contact_api:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Never
+      {{- else }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Always
+      {{- end }}
+        name: contact-api
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+          name: tcp-contact-api
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
