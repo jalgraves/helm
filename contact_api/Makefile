@@ -2,7 +2,7 @@
 
 name ?= contact-api
 image ?= contact_api
-tag ?= $(shell grep 'appVersion:' contact_api/Chart.yaml | cut -f 2 -d' ')
+tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
 port ?= 5012
 context ?= beantown
 email_recipient ?= ${CONTACT_API_EMAIL_RECIPIENT}
@@ -30,7 +30,7 @@ dev_install:
 			--debug
 
 install:
-		kubectl config use-context $(context)
+		kubectl config use-context beantown
 		helm upgrade --install $(name) . \
 			--set global.env=prod \
 			--set ingressHost=$(ingress_host) \
@@ -38,7 +38,7 @@ install:
 			--set secondEmailRecipient=$(second_recipient) \
 			--set slackUser=$(slack_user) \
 			--set slackChannel=$(slack_channel) \
-			--set ingress.enabled=$(ingress_enabled) \
+			--set ingress.enabled=true \
 			--debug
 
 template:

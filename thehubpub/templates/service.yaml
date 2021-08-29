@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wavelengths
-  namespace: default
+  name: {{ include "hubpub.fullname" . }}
 spec:
   ports:
-  - name: tcp-wavelengths
-    port: 3077
-    targetPort: 3077
+  - name: "tcp-{{ include "hubpub.fullname" . }}"
+    port: {{ .Values.containerPort }}
+    targetPort: {{ .Values.containerPort }}
   selector:
-    app: wavelengths
+    app: {{ include "hubpub.fullname" . }}
