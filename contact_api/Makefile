@@ -22,11 +22,10 @@ dev_install:
 		kubectl config use-context docker-desktop
 		helm upgrade --install $(name) . \
 			--set global.env=dev \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--set image.pullPolicy=Never \
-			--set db.host=${POSTGRES_IP} \
-			--set db.port=32432 \
+			--set emailRecipient=$(email_recipient) \
+			--set slackUser=$(slack_user) \
+			--set slackChannel=$(slack_channel) \
+			--set ingress.enabled=false \
 			--debug
 
 install:
