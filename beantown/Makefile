@@ -30,6 +30,10 @@ dev_install:
 			--set ingress.enabled=false \
 			--debug
 
+dev_delete:
+		kubectl config use-context docker-desktop
+		helm uninstall $(name)
+
 install:
 		kubectl config use-context beantown
 		helm upgrade --install beantown . \
@@ -58,5 +62,13 @@ template:
 			--set ingress.enabled=true \
 			--debug
 
+.ONESHELL: port_forward
+SHELL := /bin/bash
+
+
 port_forward:
-		kubectl port-forward --namespace default svc/beantown 3000:3000 &
+		kubectl port-forward --namespace default svc/beantown 3000:3000
+
+
+stop_port_forward:
+		$(shell ps | grep '3000:3000' | grep -v 'grep' | awk '{print $1}' | xargs kill)

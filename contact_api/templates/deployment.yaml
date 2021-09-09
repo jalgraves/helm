@@ -33,13 +33,23 @@ spec:
         - name: SLACK_WEBHOOK_USER
           value: {{ .Values.slackUser }}
         - name: SLACK_WEBHOOK_CHANNEL
-          value: {{ .Values.slackChannel }}
+          value: {{ .Values.slackChannel | quote }}
         - name: SLACK_WEBHOOK_URL
           valueFrom:
             secretKeyRef:
               key: url
               name: slack-webhook
               optional: false
+        - name: API_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: api-creds
+        - name: API_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: api-creds
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
