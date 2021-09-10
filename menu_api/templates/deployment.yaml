@@ -8,7 +8,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app: {{ include "menu-api.fullname" . }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -17,10 +17,26 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
+        app: {{ include "menu-api.fullname" . }}
     spec:
       containers:
       - env:
+        - name: DB_HOST
+          value: {{ .Values.db.host | quote }}
+        - name: DB_PORT
+          value: {{ .Values.db.port | quote }}
+        - name: DB_NAME
+          value: {{ .Values.db.dbName }}
+        - name: API_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: api-creds
+        - name: API_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: api-creds
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -31,19 +47,8 @@ spec:
             secretKeyRef:
               key: password
               name: db-auth
-        - name: DB_HOST
-          value: {{ .Values.db.host | quote }}
-        - name: DB_PORT
-          value: {{ .Values.db.port | quote }}
-        - name: DB_NAME
-          value: {{ .Values.db.dbName }}
-        - name: API_USER_PW
-          valueFrom:
-            secretKeyRef:
-              key: password
-              name: api-user
       {{- if eq .Values.global.env "dev" }}
-        image: "contact_api:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "menu_api:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: Never
       {{- else }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

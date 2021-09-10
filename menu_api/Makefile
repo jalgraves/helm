@@ -3,8 +3,12 @@
 env ?= dev
 name ?= menu-api
 image ?= menu_api
-tag ?= latest
+tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
 port ?= 5004
+db_port ?= ${DB_PORT}
+db_host ?= ${DB_HOST}
+db_name ?= ${DB_NAME}
+db_user ?= ${DB_USER}
 
 package:
 		helm package .
@@ -18,9 +22,9 @@ dev_install:
 			--set global.env=dev \
 			--set image.name=$(image) \
 			--set image.tag=$(tag) \
-			--set image.pullPolicy=Never \
-			--set db.host=${POSTGRES_IP} \
-			--set db.port=32432 \
+			--set db.host=$(db_host) \
+			--set db.port=$(db_port) \
+			--set db.name=$(db_name) \
 			--debug
 
 prod_install:
@@ -37,9 +41,9 @@ template:
 			--set global.env=$(env) \
 			--set image.name=$(image) \
 			--set image.tag=$(tag) \
-			--set image.pullPolicy=Never \
-			--set db.host=${POSTGRES_IP} \
-			--set db.port=32432 \
+			--set db.host=$(db_host) \
+			--set db.port=$(db_port) \
+			--set db.name=$(db_name) \
 			--debug
 
 
