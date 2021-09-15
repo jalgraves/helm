@@ -1,19 +1,20 @@
+{{- if .Values.ingress.enabled -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: wavelengths-ingress
-  namespace: default
+  name: {{ include "drdavisicecream.fullname" . }}
 spec:
   rules:
-  - host: www.wavelengths-brookline.com
+  - host: {{ .Values.ingressHost }}
     http:
       paths:
       - backend:
-          serviceName: wavelengths
-          servicePort: 3077
-  - host: wavelengths-brookline.com
+          serviceName: {{ include "drdavisicecream.fullname" . }}
+          servicePort: {{ .Values.containerPort }}
+  - host: "www.{{ .Values.ingressHost }}"
     http:
       paths:
       - backend:
-          serviceName: wavelengths
-          servicePort: 3077
+          serviceName: {{ include "drdavisicecream.fullname" . }}
+          servicePort: {{ .Values.containerPort }}
+{{- end }}

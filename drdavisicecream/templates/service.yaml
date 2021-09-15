@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wavelengths
-  namespace: default
+  name: {{ include "drdavisicecream.fullname" . }}
 spec:
   ports:
-  - name: tcp-wavelengths
-    port: 3077
-    targetPort: 3077
+  - name: tcp-docs
+    port: {{ .Values.containerPort }}
+    targetPort: {{ .Values.containerPort }}
   selector:
-    app: wavelengths
+    app: {{ include "drdavisicecream.fullname" . }}

@@ -1,37 +1,62 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wavelengths
-  namespace: default
+  name: {{ include "drdavisicecream.fullname" . }}
+  labels:
+    jke/workload: {{ include "drdavisicecream.fullname" . }}
+
 spec:
-  progressDeadlineSeconds: 600
+  progressDeadlineSeconds: 300
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: wavelengths
+      app: {{ include "drdavisicecream.fullname" . }}
   strategy:
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 0
     type: RollingUpdate
   template:
     metadata:
       labels:
-        app: wavelengths
+        app: {{ include "drdavisicecream.fullname" . }}
     spec:
       containers:
-      - image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        name: wavelengths
+      - env:
+        - name: CONTACT_API_HOST
+          value: {{ .Values.contactApiHost }}
+        - name: CONTACT_API_PROTOCOL
+          value: {{ .Values.contactApiProtocol }}
+        - name: API_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: api-creds
+        - name: API_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: api-creds
+      {{- if eq .Values.global.env "dev" }}
+        image: "drdavisicecream:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Never
+      {{- else }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Always
+      {{- end }}
+        name: drdavisicecream
         ports:
-        - containerPort: 3077
-          name: tcp-frontend
+        - containerPort: {{ .Values.containerPort }}
+          name: tcp-docs
           protocol: TCP
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
           readOnlyRootFilesystem: false
           runAsNonRoot: false
-        tty: true
         resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
