@@ -8,6 +8,7 @@ contact_api_protocol ?= https
 contact_api_host ?= ${CONTACT_API_INGRESS_HOST}
 ingress_enabled ?= false
 ingress_host ?= ${DRDAVIS_INGRESS_HOST}
+port ?= 3034
 
 
 package:
@@ -44,4 +45,4 @@ template:
 			--debug
 
 port_forward:
-		kubectl port-forward --namespace default svc/drdavisicecream 3037:3037 &
+		kubectl port-forward --namespace default svc/$(name) $(port):$(port)
