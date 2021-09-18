@@ -12,6 +12,8 @@ data:
         CREATE DATABASE messages OWNER jalbot;
         CREATE DATABASE users OWNER jalbot;
         CREATE DATABASE merch OWNER jalbot;
+        CREATE DATABASE orders OWNER jalbot;
+        CREATE DATABASE sessions OWNER jalbot;
     EOSQL
 kind: ConfigMap
 metadata:
