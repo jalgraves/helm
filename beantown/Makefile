@@ -9,10 +9,10 @@ contact_api_host ?= ${CONTACT_API_HOST}
 menu_api_protocol ?= ${MENU_API_PROTOCOL}
 menu_api_host ?= ${MENU_API_HOST}
 merch_api_protocol ?= ${MENU_API_PROTOCOL}
-merch_api_host ?= ${MENU_API_HOST}
+merch_api_host ?= ${MERCH_API_HOST}
 ingress_enabled ?= ${BEANTOWN_INGRESS_ENABLED}
 ingress_host ?= ${BEANTOWN_INGRESS_HOST}
-
+port ?= 3000
 
 package:
 		helm package .
@@ -67,7 +67,7 @@ SHELL := /bin/bash
 
 
 port_forward:
-		kubectl port-forward --namespace default svc/beantown 3000:3000
+		kubectl port-forward --namespace default svc/$(name) $(port):$(port)
 
 
 stop_port_forward:

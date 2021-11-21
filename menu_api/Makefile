@@ -33,6 +33,9 @@ prod_install:
 			--set global.env=prod \
 			--set image.tag=$(tag) \
 			--set image.pullPolicy=Always \
+			--set db.host=$(db_host) \
+			--set db.port=$(db_port) \
+			--set db.name=$(db_name) \
 			--debug
 
 template:

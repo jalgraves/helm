@@ -9,3 +9,4 @@ containerPort: 3000
 ingress:
   enabled: false
 
+logLevel: debug

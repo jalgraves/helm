@@ -1,17 +1,15 @@
-appName: users-api
+appName: menu-api
 
 image:
-  repository: jalgraves/users_api
+  repository: jalgraves/menu_api
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
-containerPort: 5045
-
-ingress:
-  enabled: false
+containerPort: 5004
+ingressHost: menu-api.jalgraves.com
 
 db:
-  dbName: users
+  dbName: food
   host: postgres.default.svc.cluster.local
   port: 5432

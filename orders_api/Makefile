@@ -1,8 +1,10 @@
+.PHONY: all test clean
+
 env ?= dev
-name ?= users-api
-image ?= users_api
+name ?= menu-api
+image ?= menu_api
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
-port ?= 5045
+port ?= 5004
 db_port ?= ${DB_PORT}
 db_host ?= ${DB_HOST}
 db_name ?= ${DB_NAME}
@@ -31,9 +33,6 @@ prod_install:
 			--set global.env=prod \
 			--set image.tag=$(tag) \
 			--set image.pullPolicy=Always \
-			--set db.host=$(db_host) \
-			--set db.port=$(db_port) \
-			--set db.name=$(db_name) \
 			--debug
 
 template:

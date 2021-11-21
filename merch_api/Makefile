@@ -1,12 +1,15 @@
+.PHONY: all test clean
+
 env ?= dev
-name ?= users-api
-image ?= users_api
+name ?= merch-api
+image ?= merch_api
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
-port ?= 5045
+port ?= 5000
 db_port ?= ${DB_PORT}
 db_host ?= ${DB_HOST}
 db_name ?= ${DB_NAME}
 db_user ?= ${DB_USER}
+log_level ?= DEBUG
 
 package:
 		helm package .
@@ -23,6 +26,7 @@ dev_install:
 			--set db.host=$(db_host) \
 			--set db.port=$(db_port) \
 			--set db.name=$(db_name) \
+			--set logLevel=$(log_level) \
 			--debug
 
 prod_install:
@@ -31,9 +35,6 @@ prod_install:
 			--set global.env=prod \
 			--set image.tag=$(tag) \
 			--set image.pullPolicy=Always \
-			--set db.host=$(db_host) \
-			--set db.port=$(db_port) \
-			--set db.name=$(db_name) \
 			--debug
 
 template:
@@ -49,4 +50,4 @@ template:
 
 
 port_forward:
-		kubectl port-forward --namespace default svc/$(name) $(port):$(port) &
+		kubectl port-forward --namespace default svc/$(name) $(port):$(port)
