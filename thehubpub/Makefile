@@ -1,47 +1,35 @@
 .PHONY: all test clean
 
-name ?= hubpub
-image ?= hubpub
-env ?= prod
+name ?= ${APP_NAME}
+image ?= ${IMAGE_NAME}
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
-contact_api_protocol ?= https
-contact_api_host ?= ${CONTACT_API_INGRESS_HOST}
-ingress_enabled ?= false
-ingress_host ?= ${HUBPUB_INGRESS_HOST}
 
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else ($(env),prod)
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+endif
 
 package:
 		helm package .
 
-dev_install:
-		kubectl config use-context docker-desktop
-		helm upgrade --install hubpub . \
-			--set global.env=dev \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=false \
-			--debug
+context:
+	kubectl config use-context $(context)
 
-install:
-		kubectl config use-context beantown
-		helm upgrade --install hubpub . \
-			--set global.env=prod \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=true \
+install: context
+		helm upgrade --install $(name) . \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
 template:
 		helm template . \
 			--name-template=$(name) \
+			--namespace $(namespace) \
 			--set global.env=$(env) \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=true \
 			--debug
 
-port_forward:
-		kubectl port-forward --namespace default svc/hubpub 3037:3037 &
+port_forward: context
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)

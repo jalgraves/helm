@@ -2,17 +2,17 @@
 
 name ?= beantown
 image ?= beantown
-env ?= prod
+env ?= dev
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
-contact_api_protocol ?= ${CONTACT_API_PROTOCOL}
-contact_api_host ?= ${CONTACT_API_HOST}
-menu_api_protocol ?= ${MENU_API_PROTOCOL}
-menu_api_host ?= ${MENU_API_HOST}
-merch_api_protocol ?= ${MENU_API_PROTOCOL}
-merch_api_host ?= ${MERCH_API_HOST}
-ingress_enabled ?= ${BEANTOWN_INGRESS_ENABLED}
-ingress_host ?= ${BEANTOWN_INGRESS_HOST}
-port ?= 3000
+port ?= ${BEANTOWN_PORT}
+
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+endif
 
 package:
 		helm package .
@@ -20,14 +20,8 @@ package:
 dev_install:
 		kubectl config use-context docker-desktop
 		helm upgrade --install beantown . \
+			--namespace $(namespace) \
 			--set global.env=dev \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set menuApiHost=$(menu_api_host) \
-			--set menuApiProtocol=$(menu_api_protocol) \
-			--set merchApiHost=$(merch_api_host) \
-			--set merchApiProtocol=$(merch_api_protocol) \
-			--set ingress.enabled=false \
 			--debug
 
 dev_delete:
@@ -37,38 +31,25 @@ dev_delete:
 install:
 		kubectl config use-context beantown
 		helm upgrade --install beantown . \
-			--set global.env=prod \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set menuApiHost=$(menu_api_host) \
-			--set menuApiProtocol=$(menu_api_protocol) \
-			--set merchApiHost=$(merch_api_host) \
-			--set merchApiProtocol=$(merch_api_protocol) \
-			--set ingress.enabled=true \
-			--set ingressHost=$(ingress_host) \
+			--namespace $(namespace) \
 			--debug
 
 template:
 		helm template . \
+			--namespace $(namespace) \
 			--name-template=$(name) \
 			--set global.env=$(env) \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set menuApiHost=$(menu_api_host) \
-			--set menuApiProtocol=$(menu_api_protocol) \
-			--set merchApiHost=$(merch_api_host) \
-			--set merchApiProtocol=$(merch_api_protocol) \
-			--set ingress.enabled=true \
 			--debug
 
 .ONESHELL: port_forward
-SHELL := /bin/bash
 
 
 port_forward:
-		kubectl port-forward --namespace default svc/$(name) $(port):$(port)
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)
 
 
-stop_port_forward:
-		$(shell ps | grep '3000:3000' | grep -v 'grep' | awk '{print $1}' | xargs kill)
+stop_pf:
+		../scripts/stop_port_forward.sh $(port)
+
+logs:
+		../scripts/get_pod_logs.sh $(namespace) $(name)

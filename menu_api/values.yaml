@@ -7,9 +7,13 @@ image:
   tag: ""
 
 containerPort: 5004
-ingressHost: menu-api.jalgraves.com
+ingress:
+  enabled: false
+ingressHost: ""
 
 db:
   dbName: food
-  host: postgres.default.svc.cluster.local
+  host: postgres.database.svc.cluster.local
   port: 5432
+
+logLevel: INFO

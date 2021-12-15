@@ -1,5 +1,6 @@
 image:
-  repository: jalgraves/hubpub
+  name: thehubpub
+  repository: jalgraves/thehubpub
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -8,3 +9,5 @@ containerPort: 3037
 
 ingress:
   enabled: false
+
+ingressHost: ""

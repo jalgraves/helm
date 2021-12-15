@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wavelengths
+  name: {{ include "wavelengths.fullname" . }}
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -9,7 +9,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: wavelengths
+      app: {{ include "wavelengths.fullname" . }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -18,14 +18,19 @@ spec:
   template:
     metadata:
       labels:
-        app: wavelengths
+        app: {{ include "wavelengths.fullname" . }}
     spec:
       containers:
-      - image: "{{ .Values.image.name }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        name: wavelengths
+      - name: wavelengths
+      {{- if eq .Values.global.env "dev" }}
+        image: "{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Never
+      {{- else }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: Always
+      {{- end }}
         ports:
-        - containerPort: 3077
+        - containerPort: {{ .Values.containerPort }}
           name: tcp-frontend
           protocol: TCP
         securityContext:

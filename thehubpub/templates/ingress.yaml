@@ -2,19 +2,19 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: {{ include "hubpub.fullname" . }}
+  name: {{ include "thehubpub.fullname" . }}
 spec:
   rules:
   - host: {{ .Values.ingressHost }}
     http:
       paths:
       - backend:
-          serviceName: {{ include "hubpub.fullname" . }}
+          serviceName: {{ include "thehubpub.fullname" . }}
           servicePort: {{ .Values.containerPort }}
   - host: "www.{{ .Values.ingressHost }}"
     http:
       paths:
       - backend:
-          serviceName: {{ include "hubpub.fullname" . }}
+          serviceName: {{ include "thehubpub.fullname" . }}
           servicePort: {{ .Values.containerPort }}
 {{- end }}

@@ -1,24 +1,41 @@
 .PHONY: all test clean
 
-image ?= wavelengths
-tag ?= latest
+name ?= ${APP_NAME}
+image ?= ${IMAGE_NAME}
+tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
+
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else ($(env),prod)
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+endif
 
 package:
 		helm package .
 
-dev_install:
-		kubectl config use-context docker-desktop
-		helm upgrade --install wavelengths . \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--set image.pullPolicy=Never \
+context:
+	kubectl config use-context $(context)
+
+dev_install: context
+		helm upgrade --install $(name) . \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
-install:
-		kubectl config use-context beantown
-		helm upgrade --install wavelengths . \
-			--set image.tag=$(tag) \
+install: context
+		helm upgrade --install $(name) . \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
-port_forward:
-		kubectl port-forward --namespace default svc/wavelengths 3077:3077 &
+template:
+		helm template . \
+			--name-template=$(name) \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
+			--debug
+
+port_forward: context
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)

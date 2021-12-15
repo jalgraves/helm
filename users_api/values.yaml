@@ -10,8 +10,11 @@ containerPort: 5045
 
 ingress:
   enabled: false
+ingressHost: ""
 
 db:
   dbName: users
   host: postgres.default.svc.cluster.local
   port: 5432
+
+logLevel: INFO

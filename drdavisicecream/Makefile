@@ -1,48 +1,41 @@
 .PHONY: all test clean
 
-name ?= drdavisicecream
-image ?= drdavisicecream
-env ?= prod
+name ?= ${APP_NAME}
+image ?= ${IMAGE_NAME}
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
-contact_api_protocol ?= https
-contact_api_host ?= ${CONTACT_API_INGRESS_HOST}
-ingress_enabled ?= false
-ingress_host ?= ${DRDAVIS_INGRESS_HOST}
-port ?= 3034
 
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else ($(env),prod)
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+endif
 
 package:
 		helm package .
 
-dev_install:
-		kubectl config use-context docker-desktop
+context:
+	kubectl config use-context $(context)
+
+dev_install: context
 		helm upgrade --install $(name) . \
-			--set global.env=dev \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=false \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
-install:
-		kubectl config use-context beantown
+install: context
 		helm upgrade --install $(name) . \
-			--set global.env=prod \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=true \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
 template:
 		helm template . \
 			--name-template=$(name) \
+			--namespace $(namespace) \
 			--set global.env=$(env) \
-			--set ingressHost=$(ingress_host) \
-			--set contactApiHost=$(contact_api_host) \
-			--set contactApiProtocol=$(contact_api_protocol) \
-			--set ingress.enabled=true \
 			--debug
 
-port_forward:
-		kubectl port-forward --namespace default svc/$(name) $(port):$(port)
+port_forward: context
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)

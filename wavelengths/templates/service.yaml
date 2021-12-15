@@ -6,7 +6,10 @@ metadata:
 spec:
   ports:
   - name: tcp-wavelengths
-    port: 3077
-    targetPort: 3077
+    port: {{ .Values.containerPort }}
+    targetPort: {{ .Values.containerPort }}
+  - name: http
+    port: 80
+    targetPort: {{ .Values.containerPort }}
   selector:
     app: wavelengths

@@ -1,24 +1,65 @@
 .PHONY: all test clean
 
-image ?= wavelengths
-tag ?= latest
+name ?= beantown-admin
+image ?= beantown_admin
+env ?= dev
+tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
+port ?= ${ADMIN_PORT}
+
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+endif
 
 package:
 		helm package .
 
 dev_install:
-		kubectl config use-context docker-desktop
-		helm upgrade --install wavelengths . \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--set image.pullPolicy=Never \
+		kubectl config use-context $(context)
+		helm upgrade --install $(name) . \
+			--namespace $(namespace) \
+			--set global.env=dev \
 			--debug
+
+dev_delete:
+		kubectl config use-context docker-desktop
+		helm uninstall $(name)
 
 install:
-		kubectl config use-context beantown
-		helm upgrade --install wavelengths . \
-			--set image.tag=$(tag) \
+		kubectl config use-context $(context)
+		helm upgrade --install $(name) . \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
+template:
+		helm template . \
+			--namespace $(namespace) \
+			--name-template=$(name) \
+			--set global.env=$(env) \
+			--debug
+
+.ONESHELL: port_forward
+SHELL := /bin/bash
+
+
 port_forward:
-		kubectl port-forward --namespace default svc/wavelengths 3077:3077 &
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)
+
+stop_pf:
+		../scripts/stop_port_forward.sh $(port)
+
+logs:
+		../scripts/get_pod_logs.sh $(namespace) $(name)
+
+kill_pod:
+		../scripts/kill_pod.sh $(namespace) $(name)
+
+secret:
+		../scripts/create_services_secret.sh $(namespace)
+
+describe:
+		../scripts/describe_pod.sh $(namespace) $(name)

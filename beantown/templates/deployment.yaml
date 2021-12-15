@@ -21,30 +21,58 @@ spec:
     spec:
       containers:
       - env:
-        - name: LOG_LEVEL
-          value: {{ .Values.logLevel }}
-        - name: CONTACT_API_HOST
-          value: {{ .Values.contactApiHost }}
-        - name: CONTACT_API_PROTOCOL
-          value: {{ .Values.contactApiProtocol }}
-        - name: MENU_API_HOST
-          value: {{ .Values.menuApiHost }}
-        - name: MENU_API_PROTOCOL
-          value: {{ .Values.menuApiProtocol }}
-        - name: MERCH_API_HOST
-          value: {{ .Values.merchApiHost }}
-        - name: MERCH_API_PROTOCOL
-          value: {{ .Values.merchApiProtocol }}
         - name: API_USERNAME
           valueFrom:
             secretKeyRef:
-              key: username
-              name: api-creds
+              key: api_user
+              name: app-creds
         - name: API_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password
-              name: api-creds
+              key: api_pass
+              name: app-creds
+        - name: LOG_LEVEL
+          value: {{ .Values.logLevel }}
+        - name: CONTACT_API_HOST
+          valueFrom:
+            secretKeyRef:
+              key: contact_api_host
+              name: services
+        - name: CONTACT_API_PROTOCOL
+          valueFrom:
+            secretKeyRef:
+              key: contact_api_protocol
+              name: services
+        - name: MENU_API_HOST
+          valueFrom:
+            secretKeyRef:
+              key: menu_api_host
+              name: services
+        - name: MENU_API_PROTOCOL
+          valueFrom:
+            secretKeyRef:
+              key: menu_api_protocol
+              name: services
+        - name: MERCH_API_HOST
+          valueFrom:
+            secretKeyRef:
+              key: merch_api_host
+              name: services
+        - name: MERCH_API_PROTOCOL
+          valueFrom:
+            secretKeyRef:
+              key: merch_api_protocol
+              name: services
+        - name: USERS_API_HOST
+          valueFrom:
+            secretKeyRef:
+              key: users_api_host
+              name: services
+        - name: USERS_API_PROTOCOL
+          valueFrom:
+            secretKeyRef:
+              key: users_api_protocol
+              name: services
       {{- if eq .Values.global.env "dev" }}
         image: "beantown:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: Never

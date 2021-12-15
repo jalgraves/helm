@@ -22,31 +22,42 @@ spec:
       containers:
       - env:
         - name: DB_HOST
-          value: {{ .Values.db.host | quote }}
+          valueFrom:
+            secretKeyRef:
+              key: db_host
+              name: app-creds
         - name: DB_PORT
-          value: {{ .Values.db.port | quote }}
+          valueFrom:
+            secretKeyRef:
+              key: db_port
+              name: app-creds
         - name: DB_NAME
-          value: {{ .Values.db.dbName }}
+          valueFrom:
+            secretKeyRef:
+              key: menu_db_name
+              name: menu-api-creds
         - name: API_USERNAME
           valueFrom:
             secretKeyRef:
-              key: username
-              name: api-creds
+              key: api_user
+              name: app-creds
         - name: API_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password
-              name: api-creds
+              key: api_pass
+              name: app-creds
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              key: username
-              name: db-auth
+              key: db_user
+              name: app-creds
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: password
-              name: db-auth
+              key: db_pass
+              name: app-creds
+        - name: LOG_LEVEL
+          value: {{ .Values.logLevel }}
       {{- if eq .Values.global.env "dev" }}
         image: "menu_api:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: Never
