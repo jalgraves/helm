@@ -1,7 +1,7 @@
 .PHONY: all test clean
 
-name ?= ${APP_NAME}
-image ?= ${IMAGE_NAME}
+name ?= wavelengths
+image ?= wavelengths
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
 
 ifeq ($(env),dev)
@@ -12,19 +12,10 @@ else ($(env),prod)
 	namespace = ${PROD_NAMESPACE}
 endif
 
-package:
-		helm package .
-
 context:
 	kubectl config use-context $(context)
 
-dev_install: context
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=$(env) \
-			--debug
-
-install: context
+install:
 		helm upgrade --install $(name) . \
 			--namespace $(namespace) \
 			--set global.env=$(env) \
@@ -37,5 +28,5 @@ template:
 			--set global.env=$(env) \
 			--debug
 
-port_forward: context
+port_forward:
 		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)

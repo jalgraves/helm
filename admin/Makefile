@@ -14,19 +14,16 @@ else
 	namespace = ${PROD_NAMESPACE}
 endif
 
-package:
-		helm package .
-
-dev_install:
+install:
 		kubectl config use-context $(context)
 		helm upgrade --install $(name) . \
 			--namespace $(namespace) \
-			--set global.env=dev \
+			--set global.env=$(env) \
 			--debug
 
-dev_delete:
-		kubectl config use-context docker-desktop
-		helm uninstall $(name)
+delete:
+		kubectl config use-context $(context)
+		helm uninstall $(name) -n $(namespace)
 
 install:
 		kubectl config use-context $(context)
@@ -57,9 +54,6 @@ logs:
 
 kill_pod:
 		../scripts/kill_pod.sh $(namespace) $(name)
-
-secret:
-		../scripts/create_services_secret.sh $(namespace)
 
 describe:
 		../scripts/describe_pod.sh $(namespace) $(name)

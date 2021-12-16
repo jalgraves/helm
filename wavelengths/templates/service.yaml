@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wavelengths
-  namespace: default
+  name: {{ include "wavelengths.fullname" . }}
 spec:
   ports:
   - name: tcp-wavelengths
@@ -12,4 +11,4 @@ spec:
     port: 80
     targetPort: {{ .Values.containerPort }}
   selector:
-    app: wavelengths
+    app: {{ include "wavelengths.fullname" . }}

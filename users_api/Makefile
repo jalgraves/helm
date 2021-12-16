@@ -1,4 +1,4 @@
-env ?= dev
+
 name ?= users-api
 image ?= users_api
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
@@ -6,9 +6,14 @@ port ?= 5045
 log_level ?= INFO
 
 ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
 	namespace = ${DEV_NAMESPACE}
-else
+else ifeq ($(env),prod)
+	context = ${PROD_CONTEXT}
 	namespace = ${PROD_NAMESPACE}
+else
+	@echo "No Env specified!"
+	exit 1
 endif
 
 package:
@@ -17,25 +22,18 @@ package:
 clean:
 		rm *.tgz || true
 
-dev_install:
-		kubectl config use-context docker-desktop
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=dev \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--set logLevel=$(log_level) \
-			--debug
+context:
+	kubectl config use-context $(context)
 
-prod_install:
-		kubectl config use-context new-beantown
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=prod \
-			--set image.tag=$(tag) \
-			--set image.pullPolicy=Always \
-			--set logLevel=INFO \
-			--debug
+install:
+	kubectl config use-context $(context)
+	helm upgrade --install $(name) . \
+		--namespace $(namespace) \
+		--set global.env=$(env) \
+		--set image.name=$(image) \
+		--set image.tag=$(tag) \
+		--set logLevel=$(log_level) \
+		--debug
 
 template:
 		helm template . \
@@ -60,3 +58,11 @@ describe:
 
 kill_pod:
 		../scripts/kill_pod.sh $(namespace) $(name)
+
+secret:
+	kubectl create secret generic users-api-creds \
+		--namespace $(namespace) \
+		--from-literal=default_admin_email="${DEFAULT_ADMIN_EMAIL}" \
+		--from-literal=default_admin_user="${DEFAULT_ADMIN_USER}" \
+		--from-literal=default_admin_pass="${DEFAULT_ADMIN_PASS}" \
+		--from-literal=db_name="${USERS_DB_NAME}"

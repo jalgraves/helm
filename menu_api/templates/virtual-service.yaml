@@ -6,7 +6,7 @@ metadata:
 spec:
   hosts:
   - "{{ include "menu-api.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
-  - "{{ include "menu-api.fullname" . }}.dev.beantownpub.com"
+  - "{{ include "menu-api.fullname" . }}.{{ .Release.Namespace }}.beantownpub.com"
 
   gateways:
   - istio-ingress/web-gateway

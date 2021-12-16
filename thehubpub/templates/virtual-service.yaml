@@ -6,9 +6,10 @@ metadata:
 spec:
   hosts:
   - "{{ include "thehubpub.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
-  - "{{ include "thehubpub.fullname" . }}.dev.thehubpubpub.com"
-  - "thehubpubpub.com"
-  - "www.thehubpubpub.com"
+  - "{{ include "thehubpub.fullname" . }}.{{ .Release.Namespace }}.pubpub.com"
+  - "demo.{{ .Release.Namespace }}.thehubpub.com"
+  - "thehubpub.com"
+  - "www.thehubpub.com"
 
   gateways:
   - istio-ingress/web-gateway

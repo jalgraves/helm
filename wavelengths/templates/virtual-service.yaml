@@ -5,7 +5,8 @@ metadata:
 spec:
   hosts:
   - "{{ include "wavelengths.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
-  - "{{ include "wavelengths.fullname" . }}.dev.wavelengths-brookline.com"
+  - "{{ include "wavelengths.fullname" . }}.{{ .Release.Namespace }}.wavelengths-brookline.com"
+  - "demo.{{ .Release.Namespace }}.wavelengths-brookline.com"
   - "wavelengths-brookline.com"
   - "www.wavelengths-brookline.com"
 

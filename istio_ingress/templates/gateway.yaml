@@ -12,9 +12,11 @@ spec:
       name: http
       protocol: HTTP
     hosts:
+    - "beantownpub.com"
     - "*.beantownpub.com"
-    - "*.dev.beantownpub.com"
+    - "*.prod.beantownpub.com"
     - "thehubpub.com"
+    - "*.prod.thehubpub.com"
     - "www.thehubpub.com"
     - "drdavisicecream.com"
     - "www.drdavisicecream.com"

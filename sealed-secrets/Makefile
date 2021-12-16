@@ -1,6 +1,14 @@
 .PHONY: all test clean
+SHELL := /bin/bash
 
-context ?= ${CONTEXT}
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+else ifeq ($(env),prod)
+	context = ${PROD_CONTEXT}
+else
+	@echo "No Env specified!"
+	exit 1
+endif
 
 deps:
 	helm dependencies update

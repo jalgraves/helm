@@ -4,6 +4,8 @@ data:
     #!/bin/bash
     set -e
 
+    echo "User: ${DB_USER}"
+
     psql -v -U ${POSTGRES_USER} -d ${POSTGRES_USER} <<-EOSQL
         CREATE USER ${DB_USER} WITH PASSWORD '${DB_PASS}';
         CREATE DATABASE ${DB_USER};

@@ -1,3 +1,4 @@
+{{- if eq .Values.global.env "prod" }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -9,3 +10,4 @@ spec:
       simple: LEAST_CONN
   subsets:
   - name: {{ include "drdavisicecream.fullname" . }}
+{{- end }}

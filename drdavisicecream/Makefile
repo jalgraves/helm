@@ -1,15 +1,18 @@
 .PHONY: all test clean
 
-name ?= ${APP_NAME}
-image ?= ${IMAGE_NAME}
+name ?= drdavisicecream
+image ?= drdavisicecream
+port ?= 3034
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
 
 ifeq ($(env),dev)
 	context = ${DEV_CONTEXT}
 	namespace = ${DEV_NAMESPACE}
-else ($(env),prod)
+else ifeq ($(env),prod)
 	context = ${PROD_CONTEXT}
 	namespace = ${PROD_NAMESPACE}
+else
+	@echo "You must specify an env"
 endif
 
 package:
@@ -18,13 +21,7 @@ package:
 context:
 	kubectl config use-context $(context)
 
-dev_install: context
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=$(env) \
-			--debug
-
-install: context
+install:
 		helm upgrade --install $(name) . \
 			--namespace $(namespace) \
 			--set global.env=$(env) \
@@ -37,5 +34,8 @@ template:
 			--set global.env=$(env) \
 			--debug
 
-port_forward: context
+port_forward:
 		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)
+
+stop_pf:
+		../scripts/stop_port_forward.sh $(port)

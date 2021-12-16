@@ -7,7 +7,8 @@ spec:
   hosts:
   - "{{ include "admin.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local"
   - "{{ include "admin.fullname" . }}.beantownpub.com"
-  - "{{ include "admin.fullname" . }}.dev.beantownpub.com"
+  - "{{ include "admin.fullname" . }}.{{ .Release.Namespace }}.beantownpub.com"
+  - "admin.beantownpub.com"
 
   gateways:
   - istio-ingress/web-gateway

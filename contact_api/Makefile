@@ -12,45 +12,45 @@ ingress_host ?= ${CONTACT_API_INGRESS_HOST}
 slack_user ?= ${CONTACT_API_SLACK_WEBHOOK_USER}
 slack_channel ?= ${CONTACT_API_SLACK_WEBHOOK_CHANNEL}
 
-package:
-		helm package .
+ifeq ($(env),dev)
+	context = ${DEV_CONTEXT}
+	namespace = ${DEV_NAMESPACE}
+else ifeq ($(env),prod)
+	context = ${PROD_CONTEXT}
+	namespace = ${PROD_NAMESPACE}
+else
+	@echo "No Env specified!"
+	exit 1
+endif
 
 clean:
 		rm *.tgz || true
 
-dev_install:
-		kubectl config use-context docker-desktop
-		helm upgrade --install $(name) . \
-			--set global.env=dev \
-			--set emailRecipient=$(email_recipient) \
-			--set slackUser=$(slack_user) \
-			--set slackChannel=$(slack_channel) \
-			--set ingress.enabled=false \
-			--debug
-
 install:
-		kubectl config use-context beantown
+		kubectl config use-context $(context)
 		helm upgrade --install $(name) . \
-			--set global.env=prod \
-			--set ingressHost=$(ingress_host) \
-			--set emailRecipient=$(email_recipient) \
-			--set secondEmailRecipient=$(second_recipient) \
-			--set slackUser=$(slack_user) \
-			--set slackChannel=$(slack_channel) \
-			--set ingress.enabled=true \
+			--namespace $(namespace) \
+			--set global.env=$(env) \
 			--debug
 
 template:
 		helm template . \
 			--name-template=$(name) \
+			--namespace $(namespace) \
 			--set global.env=$(env) \
-			--set ingressHost=$(ingress_host) \
-			--set emailRecipient=$(email_recipient) \
-			--set secondEmailRecipient=$(second_recipient) \
-			--set slackUser=$(slack_user) \
-			--set slackChannel=$(slack_channel) \
-			--set ingress.enabled=true \
 			--debug
 
 port_forward:
-		kubectl port-forward --namespace default svc/$(name) $(port):$(port) &
+		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)
+
+secret:
+	kubectl create secret generic contact-api-creds \
+		--namespace $(namespace) \
+		--from-literal=aws_access_key_id="${AWS_ACCESS_KEY_ID}" \
+		--from-literal=aws_secret_access_key="${AWS_SECRET_ACCESS_KEY}" \
+		--from-literal=aws_default_region="${AWS_DEFAULT_REGION}" \
+		--from-literal=email_recipient="${EMAIL_RECIPIENT}" \
+		--from-literal=second_email_recipient="${SECOND_EMAIL_RECIPIENT}" \
+		--from-literal=slack_channel="${SLACK_CHANNEL}" \
+		--from-literal=slack_user="${SLACK_USER}" \
+		--from-literal=slack_webhook_url="${SLACK_WEBHOOK_URL}"

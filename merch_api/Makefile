@@ -19,6 +19,9 @@ package:
 clean:
 		rm *.tgz || true
 
+context:
+	kubectl config use-context $(context)
+
 dev_install:
 		kubectl config use-context $(context)
 		helm upgrade --install $(name) . \
@@ -47,3 +50,8 @@ template:
 
 port_forward:
 		kubectl port-forward --namespace $(namespace) svc/$(name) $(port):$(port)
+
+secret: context
+	kubectl create secret generic merch-api-creds \
+		--namespace $(namespace) \
+		--from-literal=db_name="${MERCH_DB_NAME}"

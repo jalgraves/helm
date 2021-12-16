@@ -1,6 +1,6 @@
 image:
   name: thehubpub
-  repository: jalgraves/thehubpub
+  repository: jalgraves/hubpub
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

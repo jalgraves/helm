@@ -1,53 +1,46 @@
 .PHONY: all test clean
 
-env ?= dev
+
 name ?= menu-api
 image ?= menu_api
 tag ?= $(shell grep 'appVersion:' Chart.yaml | cut -f 2 -d' ')
 port ?= ${MENU_API_PORT}
-log_level ?=${API_LOG_LEVEL}
+log_level ?= ${MENU_API_LOG_LEVEL}
 
 ifeq ($(env),dev)
 	context = ${DEV_CONTEXT}
 	namespace = ${DEV_NAMESPACE}
-else
+else ifeq ($(env),prod)
 	context = ${PROD_CONTEXT}
 	namespace = ${PROD_NAMESPACE}
+else
+	@echo "No Env specified!"
+	exit 1
 endif
-
-package:
-		helm package .
 
 clean:
 		rm *.tgz || true
 
-dev_install:
-		kubectl config use-context $(context)
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=dev \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--set logLevel=$(log_level) \
-			--debug
+context:
+	kubectl config use-context $(context)
 
-prod_install:
-		kubectl config use-context $(context)
-		helm upgrade --install $(name) . \
-			--namespace $(namespace) \
-			--set global.env=prod \
-			--set image.tag=$(tag) \
-			--set image.pullPolicy=Always \
-			--set logLevel=$(log_level) \
-			--debug
+install:
+	kubectl config use-context $(context)
+	helm upgrade --install $(name) . \
+		--namespace $(namespace) \
+		--set global.env=$(env) \
+		--set image.name=$(image) \
+		--set image.tag=$(tag) \
+		--set logLevel=$(log_level) \
+		--debug
 
 template:
-		helm template . \
-			--name-template=$(name) \
-			--set global.env=$(env) \
-			--set image.name=$(image) \
-			--set image.tag=$(tag) \
-			--debug
+	helm template . \
+		--name-template=$(name) \
+		--set global.env=$(env) \
+		--set image.name=$(image) \
+		--set image.tag=$(tag) \
+		--debug
 
 
 port_forward:
@@ -64,3 +57,8 @@ describe:
 
 kill_pod:
 		../scripts/kill_pod.sh $(namespace) $(name)
+
+secret:
+	kubectl create secret generic menu-api-creds \
+		--namespace $(namespace) \
+		--from-literal=db_name="${MENU_DB_NAME}"

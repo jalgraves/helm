@@ -46,6 +46,11 @@ spec:
             secretKeyRef:
               key: api_pass
               name: app-creds
+        - name: DEFAULT_ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: default_admin_email
+              name: users-api-creds
         - name: DEFAULT_ADMIN_USER
           valueFrom:
             secretKeyRef:
